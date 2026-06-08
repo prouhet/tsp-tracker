@@ -80,6 +80,8 @@ For unlimited requests, upgrade to Alpha Vantage's paid tier or swap in Polygon.
 
 ---
 
+
+
 ## ⚠️ Disclaimer
 
 This tool is for **educational purposes only** and is not financial advice. TSP fund prices are based on ETF proxies, not official TSP share prices. Always consult [tsp.gov](https://tsp.gov) for official fund information before making allocation changes.
