@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import ActionRule from "../components/ActionRule";
+import LadderCard from "../components/LadderCard";
 import WatchTable from "../components/WatchTable";
 import BacktestCard from "../components/BacktestCard";
 import FundCard from "../components/FundCard";
@@ -105,6 +106,7 @@ export default function Home() {
             </div>
           ) : (
             <>
+              <LadderCard ladder={data.ladder} />
               <ActionRule rule={data.rule} share={share} setShare={setShare} stats={data.backtestByShare && data.backtestByShare[share]} />
               <WatchTable watch={data.watch} funds={data.funds} />
 
