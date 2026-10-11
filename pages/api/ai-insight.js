@@ -17,9 +17,9 @@ export default async function handler(req, res) {
         messages: [{
           role: "user",
           content:
-            "You are summarizing a TSP fund dashboard for its owner. The action rule (C Fund vs its 200-day average with a 3% buffer) is the decision; " +
-            "the weekly indicators are context only. In 3-4 plain sentences: restate what the rule says, how close it is to flipping, and anything notable in the weekly readings. " +
-            "Do not recommend a different allocation than the rule, and note this is not financial advice.\n\n" + summary,
+            "You are summarizing a TSP fund dashboard for its owner. His plan is the decision: a ladder with 15% always in C, 25% following C's 50-day average (±2%) and 60% following the 200-day rule (±3%); the weekly indicators are context only. " +
+            "In 3-4 plain sentences: restate the plan's target, how close the next step is, and anything notable in the weekly readings. " +
+            "Do not recommend a different allocation than the plan, and note this is not financial advice.\n\n" + summary,
         }],
       }),
     });

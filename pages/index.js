@@ -6,20 +6,14 @@ import WatchTable from "../components/WatchTable";
 import BacktestCard from "../components/BacktestCard";
 import FundCard from "../components/FundCard";
 
-const SHARE_KEY = "tsp_rule_share";
 
 export default function Home() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [share, setShareState] = useState(100);
   const [aiInsight, setAiInsight] = useState("");
   const [loadingAI, setLoadingAI] = useState(false);
 
-  useEffect(() => {
-    try { const v = parseInt(localStorage.getItem(SHARE_KEY), 10); if ([100, 75, 50, 25].includes(v)) setShareState(v); } catch {}
-  }, []);
-  const setShare = (v) => { setShareState(v); try { localStorage.setItem(SHARE_KEY, String(v)); } catch {} };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -44,7 +38,8 @@ export default function Home() {
     const r = data.rule;
     const lines = [
       `Action rule as of ${r.asOf}: hold ${r.hold}. C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%). ` +
-        `${r.hold === "C" ? `Sell trigger $${r.sellTrigger.toFixed(2)}` : `Buy trigger $${r.buyTrigger.toFixed(2)}`} (${r.pctToTrigger.toFixed(1)}% away). Signal since ${r.since}. Rule moves ${share}% of the balance.`,
+        `${r.hold === "C" ? `Sell trigger $${r.sellTrigger.toFixed(2)}` : `Buy trigger $${r.buyTrigger.toFixed(2)}`} (${r.pctToTrigger.toFixed(1)}% away). Signal since ${r.since}.`,
+      ...(data.ladder ? [`Dave's plan (the decision): a ladder with 15% always in C, 25% following C's 50-day average (±2%, ${data.ladder.fast.on ? "in C" : "in G"}, level $${data.ladder.fast.level.toFixed(2)}) and 60% following the 200-day rule above. Target today: ${data.ladder.targetC}% C / ${data.ladder.targetG}% G, since ${data.ladder.targetSince}.`] : []),
       ...["C", "S", "I", "F"].map((id) => {
         const w = data.watch.funds[id];
         return `${id} weekly: ${w.vs40Week.toFixed(1)}% vs 40-wk avg, PPO ${w.ppo.up ? "up" : "down"}${w.ppo.turned ? " (turned this week)" : ""}, RSI ${w.rsi.value.toFixed(0)}, squeeze ${w.squeeze.up ? "positive" : "negative"}, Markov ${w.markov.state}, 26-wk return ${w.return26Week.toFixed(1)}%.`;
@@ -107,7 +102,7 @@ export default function Home() {
           ) : (
             <>
               <LadderCard ladder={data.ladder} />
-              <ActionRule rule={data.rule} share={share} setShare={setShare} stats={data.backtestByShare && data.backtestByShare[share]} />
+              <ActionRule rule={data.rule} stats={data.backtestByShare && data.backtestByShare[100]} />
               <WatchTable watch={data.watch} funds={data.funds} />
 
               <div style={{ marginBottom: 20 }}>
