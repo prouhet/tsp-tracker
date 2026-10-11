@@ -100,7 +100,7 @@ export default function FundCard({ fund, watch, ladder }) {
         <div onClick={(e) => e.stopPropagation()} style={{ borderTop: "1px solid #1e293b", marginTop: 12, paddingTop: 14, cursor: "default" }}>
           {ladder && (() => {
             const { down, up } = ladderSteps(ladder);
-            const color = ladder.targetC >= 75 ? UP : ladder.targetC >= 40 ? AMBER : DOWN;
+            const color = ladder.targetC >= 75 ? UP : ladder.targetC >= 35 ? AMBER : DOWN;
             return (
               <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${color}33`, background: "rgba(2,6,23,0.5)", fontSize: 11, color: TEXT, lineHeight: 1.7 }}>
                 <span style={{ color, fontWeight: 700 }}>YOUR PLAN: {ladder.targetC}% C · {ladder.targetG}% G</span>{ladder.targetSince ? ` since ${ladder.targetSince}.` : "."}
