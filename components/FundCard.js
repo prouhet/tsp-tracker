@@ -1,5 +1,6 @@
 import { useState } from "react";
 import MiniChart from "./MiniChart";
+import { ladderSteps } from "./LadderCard";
 
 const UP = "#00ff88", DOWN = "#ff4466", AMBER = "#fbbf24", MUTED = "#475569", TEXT = "#94a3b8";
 const clamp = (x) => Math.max(-1, Math.min(1, x));
@@ -47,7 +48,7 @@ function Level({ label, value, color }) {
 
 const heading = { fontSize: 9, color: "#64748b", letterSpacing: 2.5, marginBottom: 10 };
 
-export default function FundCard({ fund, watch, rule }) {
+export default function FundCard({ fund, watch, ladder }) {
   const [open, setOpen] = useState(false);
   const up = fund.change >= 0;
   const above = fund.pctVs200 >= 0;
@@ -97,14 +98,21 @@ export default function FundCard({ fund, watch, rule }) {
 
       {open && (
         <div onClick={(e) => e.stopPropagation()} style={{ borderTop: "1px solid #1e293b", marginTop: 12, paddingTop: 14, cursor: "default" }}>
-          {rule && (
-            <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${rule.hold === "C" ? UP : DOWN}33`, background: "rgba(2,6,23,0.5)", fontSize: 11, color: TEXT, lineHeight: 1.6 }}>
-              <span style={{ color: rule.hold === "C" ? UP : DOWN, fontWeight: 700 }}>ACTION RULE: {rule.hold === "C" ? "HOLD C" : "HOLD G"}</span> since {rule.since}.{" "}
-              {rule.hold === "C"
-                ? <>Moves to G if C closes below <b style={{ color: "#e2e8f0" }}>{money(rule.sellTrigger)}</b> ({Math.abs(rule.pctToTrigger).toFixed(1)}% below today).</>
-                : <>Moves to C if C closes above <b style={{ color: "#e2e8f0" }}>{money(rule.buyTrigger)}</b> ({Math.abs(rule.pctToTrigger).toFixed(1)}% above today).</>}
-            </div>
-          )}
+          {ladder && (() => {
+            const { down, up } = ladderSteps(ladder);
+            const color = ladder.targetC >= 75 ? UP : ladder.targetC >= 40 ? AMBER : DOWN;
+            return (
+              <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${color}33`, background: "rgba(2,6,23,0.5)", fontSize: 11, color: TEXT, lineHeight: 1.7 }}>
+                <span style={{ color, fontWeight: 700 }}>YOUR PLAN: {ladder.targetC}% C · {ladder.targetG}% G</span>{ladder.targetSince ? ` since ${ladder.targetSince}.` : "."}
+                {down.map((s, i) => (
+                  <div key={s.name}>{i === 0 ? "Next step down" : "Then"}: below <b style={{ color: "#e2e8f0" }}>{money(s.level)}</b> ({Math.abs(s.pctToLevel).toFixed(1)}%), move {i === 0 ? "" : "another "}{s.weightPct}% to G → {s.toC}% C · {s.toG}% G.</div>
+                ))}
+                {up.map((s, i) => (
+                  <div key={s.name}>{i === 0 ? "Next step up" : "Then"}: above <b style={{ color: "#e2e8f0" }}>{money(s.level)}</b> ({Math.abs(s.pctToLevel).toFixed(1)}%), move {i === 0 ? "" : "another "}{s.weightPct}% to C → {s.toC}% C · {s.toG}% G.</div>
+                ))}
+              </div>
+            );
+          })()}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 22 }}>
             {!isG && watch && (

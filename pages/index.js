@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
-import ActionRule from "../components/ActionRule";
 import LadderCard from "../components/LadderCard";
 import WatchTable from "../components/WatchTable";
 import BacktestCard from "../components/BacktestCard";
@@ -35,11 +34,12 @@ export default function Home() {
     if (!data) return;
     setLoadingAI(true);
     setAiInsight("");
-    const r = data.rule;
+    const r = data.rule, l = data.ladder;
     const lines = [
-      `Action rule as of ${r.asOf}: hold ${r.hold}. C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%). ` +
-        `${r.hold === "C" ? `Sell trigger $${r.sellTrigger.toFixed(2)}` : `Buy trigger $${r.buyTrigger.toFixed(2)}`} (${r.pctToTrigger.toFixed(1)}% away). Signal since ${r.since}.`,
-      ...(data.ladder ? [`Dave's plan (the decision): a ladder with 15% always in C, 25% following C's 50-day average (±2%, ${data.ladder.fast.on ? "in C" : "in G"}, level $${data.ladder.fast.level.toFixed(2)}) and 60% following the 200-day rule above. Target today: ${data.ladder.targetC}% C / ${data.ladder.targetG}% G, since ${data.ladder.targetSince}.`] : []),
+      `Dave's plan (the only plan; the decision): a C Fund ladder with 15% always in C, 25% following C's 50-day average (±2%) and 60% following its 200-day average (±3%). ` +
+        `Target as of ${l.asOf}: ${l.targetC}% C / ${l.targetG}% G since ${l.targetSince}. 50-day line ${l.fast.on ? "in C" : "in G"} (level $${l.fast.level.toFixed(2)}, ${l.fast.pctToLevel.toFixed(1)}% away); ` +
+        `200-day line ${l.slow.on ? "in C" : "in G"} (level $${l.slow.level.toFixed(2)}, ${l.slow.pctToLevel.toFixed(1)}% away).`,
+      `C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%).`,
       ...["C", "S", "I", "F"].map((id) => {
         const w = data.watch.funds[id];
         return `${id} weekly: ${w.vs40Week.toFixed(1)}% vs 40-wk avg, PPO ${w.ppo.up ? "up" : "down"}${w.ppo.turned ? " (turned this week)" : ""}, RSI ${w.rsi.value.toFixed(0)}, squeeze ${w.squeeze.up ? "positive" : "negative"}, Markov ${w.markov.state}, 26-wk return ${w.return26Week.toFixed(1)}%.`;
@@ -60,7 +60,7 @@ export default function Home() {
     <>
       <Head>
         <title>TSP Fund Signal Tracker</title>
-        <meta name="description" content="One tested action rule for your TSP allocation, on official tsp.gov prices" />
+        <meta name="description" content="Your C Fund ladder plan for the TSP, on official tsp.gov prices" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
       </Head>
@@ -79,7 +79,7 @@ export default function Home() {
             <div>
               <div style={{ fontSize: 9, color: "#475569", letterSpacing: 4, marginBottom: 6 }}>THRIFT SAVINGS PLAN</div>
               <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -1 }}>FUND SIGNAL <span style={{ color: "#00ff88" }}>TRACKER</span></h1>
-              <p style={{ fontSize: 11, color: "#475569", fontStyle: "italic", marginTop: 4 }}>200-day trend rule · weekly momentum watch · official TSP prices</p>
+              <p style={{ fontSize: 11, color: "#475569", fontStyle: "italic", marginTop: 4 }}>C Fund ladder plan · weekly momentum watch · official TSP prices</p>
             </div>
             <div style={{ textAlign: "right" }}>
               {data && <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>PRICES AS OF {data.asOf}</div>}
@@ -102,7 +102,6 @@ export default function Home() {
           ) : (
             <>
               <LadderCard ladder={data.ladder} />
-              <ActionRule rule={data.rule} stats={data.backtestByShare && data.backtestByShare[100]} />
               <WatchTable watch={data.watch} funds={data.funds} />
 
               <div style={{ marginBottom: 20 }}>
@@ -118,11 +117,12 @@ export default function Home() {
                 )}
               </div>
 
+              <BacktestCard bt={data.backtest} />
+
               <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
-                {data.funds.map((f) => <FundCard key={f.id} fund={f} watch={data.watch.funds[f.id]} rule={f.id === "C" ? data.rule : null} />)}
+                {data.funds.map((f) => <FundCard key={f.id} fund={f} watch={data.watch.funds[f.id]} ladder={f.id === "C" ? data.ladder : null} />)}
               </div>
 
-              <BacktestCard bt={data.backtest} />
 
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #0f172a", fontSize: 10, color: "#334155", textAlign: "center", lineHeight: 1.8 }}>
                 FOR EDUCATIONAL PURPOSES ONLY · NOT FINANCIAL ADVICE<br />
