@@ -122,7 +122,7 @@ export default function Home() {
               </div>
 
               <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
-                {data.funds.map((f) => <FundCard key={f.id} fund={f} />)}
+                {data.funds.map((f) => <FundCard key={f.id} fund={f} watch={data.watch.funds[f.id]} rule={f.id === "C" ? data.rule : null} />)}
               </div>
 
               <BacktestCard bt={data.backtest} />
