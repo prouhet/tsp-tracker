@@ -130,6 +130,17 @@ export default function Home() {
               <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #0f172a", fontSize: 10, color: "#334155", textAlign: "center", lineHeight: 1.8 }}>
                 FOR EDUCATIONAL PURPOSES ONLY · NOT FINANCIAL ADVICE<br />
                 PRICES ARE OFFICIAL TSP SHARE PRICES FROM TSP.GOV, UPDATED ONCE PER TRADING DAY · DATA FEED: /api/signal
+                {data.data && (
+                  <>
+                    <br />
+                    {data.data.storedThrough ? `HISTORY STORED THROUGH ${data.data.storedThrough} · ` : ""}
+                    {data.data.error
+                      ? "TSP.GOV UNREACHABLE, SHOWING STORED PRICES"
+                      : data.data.downloaded
+                        ? `NEW PRICES DOWNLOADED THROUGH ${data.data.through}`
+                        : `CHECKED TSP.GOV, NO NEW PRICES SINCE ${data.data.through}`}
+                  </>
+                )}
               </div>
             </>
           )}

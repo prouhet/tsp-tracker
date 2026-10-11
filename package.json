@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/snapshot-tsp.mjs",
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/snapshot-tsp.mjs && next build",
     "start": "next start",
     "lint": "next lint"
   },

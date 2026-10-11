@@ -1,4 +1,4 @@
-import { getTspHistory } from "../../lib/tspData";
+import { getTspHistory, getDataStatus } from "../../lib/tspData";
 import { buildSignal } from "../../lib/engine";
 
 export const config = { maxDuration: 30 };
@@ -10,6 +10,7 @@ export default async function handler(req, res) {
   try {
     const rows = await getTspHistory();
     const signal = buildSignal(rows);
+    signal.data = getDataStatus();
     if (req.query.brief) {
       delete signal.backtest.curve;
       signal.backtest.annual = signal.backtest.annual.slice(0, 5);

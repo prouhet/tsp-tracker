@@ -13,7 +13,11 @@ The rule was picked after testing ~45 alternatives on official prices since 2004
 
 ## Data
 
-Prices come from `https://www.tsp.gov/data/fund-price-history.csv` (no API key). If tsp.gov can't be reached the app shows an error instead of made-up data.
+Prices come from `https://www.tsp.gov/data/fund-price-history.csv` (no API key). tsp.gov publishes the full history as one static file, regenerated once a day, and ignores date parameters, so:
+
+- **Stored history:** every build runs `scripts/snapshot-tsp.mjs`, which saves the full history and the file's version tags into the deployment (`data/tsp-history.json`, not committed).
+- **Only new prices are downloaded:** at runtime the app asks tsp.gov whether the file changed since its stored copy (at most every 30 minutes per server). Unchanged → "not modified", zero bytes. Changed → one download, which replaces the stored copy.
+- **Outages:** if tsp.gov can't be reached the app keeps showing the stored official prices and says so. It never falls back to made-up data.
 
 ## Data feed
 
