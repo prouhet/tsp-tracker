@@ -1,7 +1,8 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
-  const { summary } = req.body;
+  const { summary } = req.body || {};
   if (!summary) return res.status(400).json({ error: "Missing summary" });
+  if (!process.env.ANTHROPIC_API_KEY) return res.status(200).json({ insight: "AI analysis isn't set up: add ANTHROPIC_API_KEY in Vercel's environment variables." });
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -12,13 +13,19 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: `You are a TSP investment advisor. Give a concise 3-4 sentence recommendation on which TSP funds to switch into, hold, or avoid based on these signals. Plain prose only.\n\n${summary}` }],
+        max_tokens: 600,
+        messages: [{
+          role: "user",
+          content:
+            "You are summarizing a TSP fund dashboard for its owner. The action rule (C Fund vs its 200-day average with a 3% buffer) is the decision; " +
+            "the weekly indicators are context only. In 3-4 plain sentences: restate what the rule says, how close it is to flipping, and anything notable in the weekly readings. " +
+            "Do not recommend a different allocation than the rule, and note this is not financial advice.\n\n" + summary,
+        }],
       }),
     });
     const data = await response.json();
     if (data.error) return res.status(200).json({ insight: `Error: ${data.error.message}` });
-    const insight = data.content?.map(b => b.text || "").join("") || "Unable to generate insight.";
+    const insight = data.content?.map((b) => b.text || "").join("") || "Unable to generate insight.";
     res.status(200).json({ insight });
   } catch (err) {
     res.status(500).json({ error: "AI insight failed" });
