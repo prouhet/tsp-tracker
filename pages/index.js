@@ -36,7 +36,7 @@ export default function Home() {
     setAiInsight("");
     const r = data.rule, l = data.ladder;
     const lines = [
-      `Dave's plan (the only plan; the decision): a C Fund ladder with 15% always in C, 25% following C's 50-day average (±2%) and 60% following its 200-day average (±3%). ` +
+      `Dave's plan (the only plan; the decision): a C Fund ladder with ${l.floorPct}% always in C, ${l.fast.weightPct}% following C's 50-day average (±${l.fast.bandPct}%) and ${l.slow.weightPct}% following its 200-day average (±${l.slow.bandPct}%). ` +
         `Target as of ${l.asOf}: ${l.targetC}% C / ${l.targetG}% G since ${l.targetSince}. 50-day line ${l.fast.on ? "in C" : "in G"} (level $${l.fast.level.toFixed(2)}, ${l.fast.pctToLevel.toFixed(1)}% away); ` +
         `200-day line ${l.slow.on ? "in C" : "in G"} (level $${l.slow.level.toFixed(2)}, ${l.slow.pctToLevel.toFixed(1)}% away).`,
       `C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%).`,

@@ -44,7 +44,7 @@ function legDetail(leg) {
 
 export default function LadderCard({ ladder }) {
   if (!ladder) return null;
-  const color = ladder.targetC >= 75 ? UP : ladder.targetC >= 40 ? AMBER : DOWN;
+  const color = ladder.targetC >= 75 ? UP : ladder.targetC >= 35 ? AMBER : DOWN;
   const bt = ladder.backtest;
   const { down, up } = ladderSteps(ladder);
   const stepRow = (s, i, first) => (
