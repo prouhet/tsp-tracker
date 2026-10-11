@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     if (req.query.brief) {
       delete signal.backtest.curve;
       signal.backtest.annual = signal.backtest.annual.slice(0, 5);
-      signal.backtest.switches = signal.backtest.switches.slice(0, 6);
+      signal.backtest.steps = signal.backtest.steps.slice(0, 6);
       signal.funds = signal.funds.map(({ chart, ...f }) => f);
     }
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=86400");
