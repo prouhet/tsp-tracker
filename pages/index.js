@@ -37,8 +37,8 @@ export default function Home() {
     setAiInsight("");
     const r = data.rule, l = data.ladder;
     const lines = [
-      `Dave's plan (the only plan; the decision): a C Fund ladder with ${l.floorPct}% always in C, ${l.fast.weightPct}% following C's 50-day average (±${l.fast.bandPct}%) and ${l.slow.weightPct}% following its 200-day average (±${l.slow.bandPct}%). ` +
-        `Target as of ${l.asOf}: ${l.targetC}% C / ${l.targetG}% G since ${l.targetSince}. 50-day line ${l.fast.on ? "in C" : "in G"} (level $${l.fast.level.toFixed(2)}, ${l.fast.pctToLevel.toFixed(1)}% away); ` +
+      `Dave's plan (the only plan; the decision): a C Fund ladder with ${l.floorPct}% always in C, ${l.fast.weightPct}% following C's 50-day average (±${l.fast.bandPct}%; it moves to G only when C is below the exit level AND C's 20-day volatility is ${l.fast.calmVolPct}%+) and ${l.slow.weightPct}% following its 200-day average (±${l.slow.bandPct}%). ` +
+        `Target as of ${l.asOf}: ${l.targetC}% C / ${l.targetG}% G since ${l.targetSince}. 50-day line ${l.fast.on ? (l.fast.armed ? `in C but ARMED (C below the exit level since ${l.fast.armedSince}; volatility ${l.fast.vol.toFixed(1)}% must reach ${l.fast.calmVolPct}% to sell)` : "in C") : "in G"} (level $${l.fast.level.toFixed(2)}, ${l.fast.pctToLevel.toFixed(1)}% away); ` +
         `200-day line ${l.slow.on ? "in C" : "in G"} (level $${l.slow.level.toFixed(2)}, ${l.slow.pctToLevel.toFixed(1)}% away).`,
       `C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%).`,
       ...(data.volatility ? [`C Fund 20-day volatility ${data.volatility.vol.toFixed(1)}% (${data.volatility.zoneLabel}; usual ${data.volatility.funds[0].median.toFixed(1)}%). From this zone since 2004, a 10%+ drop followed within 3 months ${data.volatility.zones.find((z) => z.id === data.volatility.zone).dropOddsPct.toFixed(0)}% of the time. Fast-crash flag ${data.volatility.fastCrash.on ? "ON" : "off"}. S volatility ${data.volatility.funds[1].now.toFixed(1)}%, I ${data.volatility.funds[2].now.toFixed(1)}%.`] : []),

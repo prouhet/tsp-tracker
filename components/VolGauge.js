@@ -75,9 +75,10 @@ export default function VolGauge({ vol, ladder }) {
 
       <div style={{ marginTop: 14, display: "grid", gap: 8 }}>
         <div style={{ fontSize: 10, color: TEXT, lineHeight: 1.7, padding: "8px 10px", borderRadius: 8, border: "1px solid #1e293b", background: "rgba(2,6,23,0.5)" }}>
-          <b style={{ color: vol.vol < vol.calmLevel ? UP : AMBER }}>50-DAY STEP:</b>{" "}
-          When volatility was under {vol.calmLevel}%, only {calm.helped} of {calm.n} moves of the {ladder ? ladder.fast.weightPct : 25}% to G paid off before the buy-back;
-          above {vol.calmLevel}%, {busy.helped} of {busy.n} did. A 50-day break in a calm market has usually been noise.
+          <b style={{ color: vol.vol < vol.calmLevel ? UP : AMBER }}>50-DAY STEP NEEDS {vol.calmLevel}%+:</b>{" "}
+          The plan moves the {ladder ? ladder.fast.weightPct : 25}% to G only when C breaks below its 50-day exit level with volatility at {vol.calmLevel}% or more
+          (now {vol.vol.toFixed(1)}%{vol.vol < vol.calmLevel ? ", so a break today would wait" : ""}). Since 2004, selling at the break paid off {calm.helped} of {calm.n} times when
+          volatility was under {vol.calmLevel}% and {busy.helped} of {busy.n} times above it: in a calm market a break has usually been noise.
         </div>
         <div style={{ fontSize: 10, color: fc.on ? "#fecdd3" : TEXT, lineHeight: 1.7, padding: "8px 10px", borderRadius: 8, border: `1px solid ${fc.on ? DOWN + "88" : "#1e293b"}`, background: fc.on ? "rgba(255,68,102,0.08)" : "rgba(2,6,23,0.5)" }}>
           <b style={{ color: fc.on ? DOWN : MUTED }}>FAST-CRASH FLAG: {fc.on ? "ON" : "OFF"}.</b>{" "}
