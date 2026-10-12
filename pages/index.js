@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import LadderCard from "../components/LadderCard";
+import VolGauge from "../components/VolGauge";
 import WatchTable from "../components/WatchTable";
 import BacktestCard from "../components/BacktestCard";
 import FundCard from "../components/FundCard";
@@ -40,6 +41,7 @@ export default function Home() {
         `Target as of ${l.asOf}: ${l.targetC}% C / ${l.targetG}% G since ${l.targetSince}. 50-day line ${l.fast.on ? "in C" : "in G"} (level $${l.fast.level.toFixed(2)}, ${l.fast.pctToLevel.toFixed(1)}% away); ` +
         `200-day line ${l.slow.on ? "in C" : "in G"} (level $${l.slow.level.toFixed(2)}, ${l.slow.pctToLevel.toFixed(1)}% away).`,
       `C Fund $${r.price.toFixed(2)}, 200-day average $${r.average.toFixed(2)} (${r.pctVsAverage.toFixed(1)}%).`,
+      ...(data.volatility ? [`C Fund 20-day volatility ${data.volatility.vol.toFixed(1)}% (${data.volatility.zoneLabel}; usual ${data.volatility.funds[0].median.toFixed(1)}%). From this zone since 2004, a 10%+ drop followed within 3 months ${data.volatility.zones.find((z) => z.id === data.volatility.zone).dropOddsPct.toFixed(0)}% of the time. Fast-crash flag ${data.volatility.fastCrash.on ? "ON" : "off"}. S volatility ${data.volatility.funds[1].now.toFixed(1)}%, I ${data.volatility.funds[2].now.toFixed(1)}%.`] : []),
       ...["C", "S", "I", "F"].map((id) => {
         const w = data.watch.funds[id];
         return `${id} weekly: ${w.vs40Week.toFixed(1)}% vs 40-wk avg, PPO ${w.ppo.up ? "up" : "down"}${w.ppo.turned ? " (turned this week)" : ""}, RSI ${w.rsi.value.toFixed(0)}, squeeze ${w.squeeze.up ? "positive" : "negative"}, Markov ${w.markov.state}, 26-wk return ${w.return26Week.toFixed(1)}%.`;
@@ -79,7 +81,7 @@ export default function Home() {
             <div>
               <div style={{ fontSize: 9, color: "#475569", letterSpacing: 4, marginBottom: 6 }}>THRIFT SAVINGS PLAN</div>
               <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: -1 }}>FUND SIGNAL <span style={{ color: "#00ff88" }}>TRACKER</span></h1>
-              <p style={{ fontSize: 11, color: "#475569", fontStyle: "italic", marginTop: 4 }}>C Fund ladder plan · weekly momentum watch · official TSP prices</p>
+              <p style={{ fontSize: 11, color: "#475569", fontStyle: "italic", marginTop: 4 }}>C Fund ladder plan · volatility gauge · weekly momentum watch · official TSP prices</p>
             </div>
             <div style={{ textAlign: "right" }}>
               {data && <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>PRICES AS OF {data.asOf}</div>}
@@ -102,6 +104,7 @@ export default function Home() {
           ) : (
             <>
               <LadderCard ladder={data.ladder} />
+              <VolGauge vol={data.volatility} ladder={data.ladder} />
               <WatchTable watch={data.watch} funds={data.funds} />
 
               <div style={{ marginBottom: 20 }}>
