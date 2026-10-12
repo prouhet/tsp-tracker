@@ -9,7 +9,9 @@ export function ladderSteps(ladder) {
     { name: `${ladder.slow.n}-day`, ...ladder.slow },
   ];
   let c = ladder.targetC;
-  const down = legs.filter((l) => l.on).sort((a, b) => b.level - a.level).map((l) => {
+  // an armed step is already past its price level, so it comes first
+  const rank = (l) => (l.armed ? Infinity : l.level);
+  const down = legs.filter((l) => l.on).sort((a, b) => rank(b) - rank(a)).map((l) => {
     c -= l.weightPct;
     return { ...l, dir: "down", toC: c, toG: 100 - c };
   });
@@ -19,6 +21,14 @@ export function ladderSteps(ladder) {
     return { ...l, dir: "up", toC: c, toG: 100 - c };
   });
   return { down, up };
+}
+
+// What has to happen for a step, in words (used by the plan card and the C fund card).
+export function stepTrigger(s) {
+  if (s.dir === "up") return { main: <>C closes above <b style={{ color: "#e2e8f0" }}>{usd(s.level)}</b></>, note: `${Math.abs(s.pctToLevel).toFixed(1)}% above today` };
+  if (s.armed) return { main: <>volatility reaches <b style={{ color: "#e2e8f0" }}>{s.calmVolPct}%</b></>, note: `now ${s.vol.toFixed(1)}%; C already below ${usd(s.exitLevel)}` };
+  if (s.calmVolPct != null) return { main: <>C closes below <b style={{ color: "#e2e8f0" }}>{usd(s.level)}</b> with volatility {s.calmVolPct}%+</>, note: `${Math.abs(s.pctToLevel).toFixed(1)}% below today; volatility now ${s.vol.toFixed(1)}%` };
+  return { main: <>C closes below <b style={{ color: "#e2e8f0" }}>{usd(s.level)}</b></>, note: `${Math.abs(s.pctToLevel).toFixed(1)}% below today` };
 }
 
 function Layer({ pct, title, detail, status, color }) {
@@ -36,11 +46,15 @@ function Layer({ pct, title, detail, status, color }) {
   );
 }
 
+const B = ({ children }) => <b style={{ color: "#e2e8f0" }}>{children}</b>;
 function legDetail(leg) {
-  return leg.on
-    ? <>In C since {leg.since}. {leg.n}-day average {usd(leg.average)}. This {leg.weightPct}% moves to G if C closes below <b style={{ color: "#e2e8f0" }}>{usd(leg.level)}</b>.</>
-    : <>In G since {leg.since}. {leg.n}-day average {usd(leg.average)}. This {leg.weightPct}% moves back to C if C closes above <b style={{ color: "#e2e8f0" }}>{usd(leg.level)}</b>.</>;
+  if (!leg.on) return <>In G since {leg.since}. {leg.n}-day average {usd(leg.average)}. This {leg.weightPct}% moves back to C if C closes above <B>{usd(leg.level)}</B>.</>;
+  if (leg.armed) return <>C closed below the exit level ({usd(leg.exitLevel)}) on {leg.armedSince}, but volatility is {leg.vol.toFixed(1)}%, under {leg.calmVolPct}%, so this {leg.weightPct}% stays in C for now. It moves to G at the first close with volatility <B>{leg.calmVolPct}%+</B>, unless C first closes back above <B>{usd(leg.backLevel)}</B>.</>;
+  if (leg.calmVolPct != null) return <>In C since {leg.since}. {leg.n}-day average {usd(leg.average)}. This {leg.weightPct}% moves to G if C closes below <B>{usd(leg.level)}</B> while volatility is <B>{leg.calmVolPct}%+</B> (now {leg.vol.toFixed(1)}%). Below {leg.calmVolPct}% the plan waits for volatility to confirm the drop.</>;
+  return <>In C since {leg.since}. {leg.n}-day average {usd(leg.average)}. This {leg.weightPct}% moves to G if C closes below <B>{usd(leg.level)}</B>.</>;
 }
+const legStatus = (leg) => (!leg.on ? "IN G" : leg.armed ? "IN C · ARMED" : "IN C");
+const legColor = (leg) => (!leg.on ? DOWN : leg.armed ? AMBER : UP);
 
 export default function LadderCard({ ladder }) {
   if (!ladder) return null;
@@ -52,8 +66,7 @@ export default function LadderCard({ ladder }) {
       <span style={{ color: s.dir === "down" ? DOWN : UP, minWidth: 16 }}>{i + 1}.</span>
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexWrap: "wrap", columnGap: 10, justifyContent: "space-between" }}>
         <span>
-          C closes {s.dir === "down" ? "below" : "above"} <b style={{ color: "#e2e8f0" }}>{usd(s.level)}</b>{" "}
-          <span style={{ color: MUTED }}>({Math.abs(s.pctToLevel).toFixed(1)}% {s.dir === "down" ? "below" : "above"} today)</span>
+          {stepTrigger(s).main} <span style={{ color: MUTED }}>({stepTrigger(s).note})</span>
         </span>
         <span>
           {first ? "move" : "move another"} {s.weightPct}% {s.dir === "down" ? "to G" : "to C"} → <b style={{ color: s.dir === "down" ? DOWN : UP, whiteSpace: "nowrap" }}>{s.toC}% C · {s.toG}% G</b>
@@ -82,8 +95,8 @@ export default function LadderCard({ ladder }) {
 
       <div style={{ marginTop: 14 }}>
         <Layer pct={ladder.floorPct} title="Always in C" status="FIXED" color={UP} detail="Keeps you invested through every switch; never moves." />
-        <Layer pct={ladder.fast.weightPct} title={`Follows the ${ladder.fast.n}-day average (±${ladder.fast.bandPct}%)`} status={ladder.fast.on ? "IN C" : "IN G"} color={ladder.fast.on ? UP : DOWN} detail={legDetail(ladder.fast)} />
-        <Layer pct={ladder.slow.weightPct} title={`Follows the ${ladder.slow.n}-day average (±${ladder.slow.bandPct}%)`} status={ladder.slow.on ? "IN C" : "IN G"} color={ladder.slow.on ? UP : DOWN} detail={legDetail(ladder.slow)} />
+        <Layer pct={ladder.fast.weightPct} title={`Follows the ${ladder.fast.n}-day average (±${ladder.fast.bandPct}%)${ladder.fast.calmVolPct != null ? `; sells only at ${ladder.fast.calmVolPct}%+ volatility` : ""}`} status={legStatus(ladder.fast)} color={legColor(ladder.fast)} detail={legDetail(ladder.fast)} />
+        <Layer pct={ladder.slow.weightPct} title={`Follows the ${ladder.slow.n}-day average (±${ladder.slow.bandPct}%)`} status={legStatus(ladder.slow)} color={legColor(ladder.slow)} detail={legDetail(ladder.slow)} />
       </div>
 
       {ladder.recentChanges.length > 0 && (

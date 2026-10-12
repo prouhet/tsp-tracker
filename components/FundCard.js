@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MiniChart from "./MiniChart";
-import { ladderSteps } from "./LadderCard";
+import { ladderSteps, stepTrigger } from "./LadderCard";
 
 const UP = "#00ff88", DOWN = "#ff4466", AMBER = "#fbbf24", MUTED = "#475569", TEXT = "#94a3b8";
 const clamp = (x) => Math.max(-1, Math.min(1, x));
@@ -105,10 +105,10 @@ export default function FundCard({ fund, watch, ladder }) {
               <div style={{ marginBottom: 14, padding: "10px 12px", borderRadius: 8, border: `1px solid ${color}33`, background: "rgba(2,6,23,0.5)", fontSize: 11, color: TEXT, lineHeight: 1.7 }}>
                 <span style={{ color, fontWeight: 700 }}>YOUR PLAN: {ladder.targetC}% C · {ladder.targetG}% G</span>{ladder.targetSince ? ` since ${ladder.targetSince}.` : "."}
                 {down.map((s, i) => (
-                  <div key={s.name}>{i === 0 ? "Next step down" : "Then"}: below <b style={{ color: "#e2e8f0" }}>{money(s.level)}</b> ({Math.abs(s.pctToLevel).toFixed(1)}%), move {i === 0 ? "" : "another "}{s.weightPct}% to G → {s.toC}% C · {s.toG}% G.</div>
+                  <div key={s.name}>{i === 0 ? "Next step down" : "Then"}: when {stepTrigger(s).main} ({stepTrigger(s).note}), move {i === 0 ? "" : "another "}{s.weightPct}% to G → {s.toC}% C · {s.toG}% G.</div>
                 ))}
                 {up.map((s, i) => (
-                  <div key={s.name}>{i === 0 ? "Next step up" : "Then"}: above <b style={{ color: "#e2e8f0" }}>{money(s.level)}</b> ({Math.abs(s.pctToLevel).toFixed(1)}%), move {i === 0 ? "" : "another "}{s.weightPct}% to C → {s.toC}% C · {s.toG}% G.</div>
+                  <div key={s.name}>{i === 0 ? "Next step up" : "Then"}: when {stepTrigger(s).main} ({stepTrigger(s).note}), move {i === 0 ? "" : "another "}{s.weightPct}% to C → {s.toC}% C · {s.toG}% G.</div>
                 ))}
               </div>
             );
