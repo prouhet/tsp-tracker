@@ -17,8 +17,8 @@ export default async function handler(req, res) {
         messages: [{
           role: "user",
           content:
-            "You are summarizing a TSP fund dashboard for its owner. His plan is the decision: a C Fund ladder whose layers and target are given in the summary below; the weekly indicators are context only. " +
-            "In 3-4 plain sentences: restate the plan's target, how close the next step is, and anything notable in the weekly readings. " +
+            "You are summarizing a TSP fund dashboard for its owner. His plan is the decision: a C Fund ladder whose layers and target are given in the summary below; the volatility gauge and weekly indicators are context only. " +
+            "In 3-4 plain sentences: restate the plan's target, how close the next step is, what the volatility reading says about the odds of a big drop, and anything notable in the weekly readings. " +
             "Do not recommend a different allocation than the plan, and note this is not financial advice.\n\n" + summary,
         }],
       }),
